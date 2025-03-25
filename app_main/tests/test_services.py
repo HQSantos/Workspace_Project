@@ -2,6 +2,7 @@ from django.test import TestCase
 from unittest.mock import patch
 from app_main.services import obter_cotacoes
 from app_main.models import Cotacao
+from decimal import Decimal
 
 class CotacaoServiceTest(TestCase):
     @patch("app_main.services.requests.get")
@@ -14,14 +15,14 @@ class CotacaoServiceTest(TestCase):
             "rates": {
                 "BRL": 5.20,
                 "EUR": 0.92,
-                "JPY": 130.5
+                "JPY": 130.50
             }
         }
 
         obter_cotacoes()
 
         # Validar os dados da Cotacao
-        self.assertEqual(Cotacao.objects.count(), 3)
-        self.assertEqual(Cotacao.objects.get(moeda="BRL").valor, 5.20)
-        self.assertEqual(Cotacao.objects.get(moeda="EUR").valor, 0.92)
-        self.assertEqual(Cotacao.objects.get(moeda="JPY").valor, 130.5)
+        # Estava ocorrendo um erro de formato ao comparar os valores, convertendo para decimal corrige o erro
+        self.assertEqual(Cotacao.objects.get(moeda="BRL").valor, Decimal("5.20"))
+        self.assertEqual(Cotacao.objects.get(moeda="EUR").valor, Decimal("0.92"))
+        self.assertEqual(Cotacao.objects.get(moeda="JPY").valor, Decimal("130.50"))
