@@ -5,3 +5,11 @@
 app_main/__pycache__/services.cpython-313.pyc
 app_main/__pycache__/log_config.cpython-313.pyc
 /app_main/tests/__pycache__
+/app_main/utils/__pycache__
+/Project_Cotacoes/__pycache__
+/Project_Cotacoes/__pycache__
+Project_Cotacoes/__pycache__/urls.cpython-313.pyc
+*.pyc
+/Project_Cotacoes
+Project_Cotacoes/__pycache__/urls.cpython-313.pyc
+/Project_Cotacoes/__pycache__

@@ -1,28 +1,45 @@
 from django.test import TestCase
 from unittest.mock import patch
-from app_main.services import obter_cotacoes
+from datetime import date, timedelta
 from app_main.models import Cotacao
-from decimal import Decimal
+from app_main.services import obter_cotacoes
 
 class CotacaoServiceTest(TestCase):
+    def setUp(self):
+        """
+        Configuração inicial: cria cotações para 7 dias úteis anteriores.
+        """
+        self.moedas = ["BRL", "EUR", "JPY"]
+
+        # Criar cotações para 7 dias úteis anteriores
+        data_atual = date.today()
+        dias_uteis = []
+        while len(dias_uteis) < 7:
+            if data_atual.weekday() < 5:  # Segunda a sexta-feira
+                dias_uteis.append(data_atual)
+            data_atual -= timedelta(days=1)  # Volta um dia
+
+        for data in dias_uteis:
+            for moeda in self.moedas:
+                Cotacao.objects.create(moeda=moeda, data=data, valor=5.0)
+
     @patch("app_main.services.requests.get")
-    def test_obter_cotacoes_sucesso(self, mock_get):
-        # Simular um JSON de resposta da API
+    def test_limita_cinco_dias_uteis(self, mock_get):
+        """
+        Testa se o sistema mantém apenas os últimos 5 dias úteis após obter novas cotações.
+        """
+        # Simula uma nova cotação recebida da API
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {
-            "date": "2025-03-23",
+            "date": str(date.today()),
             "base": "USD",
-            "rates": {
-                "BRL": 5.20,
-                "EUR": 0.92,
-                "JPY": 130.50
-            }
+            "rates": {"BRL": 5.20, "EUR": 0.92, "JPY": 130.5}
         }
 
-        obter_cotacoes()
+        obter_cotacoes()  # Chama a função que deve limpar os dias extras
 
-        # Validar os dados da Cotacao
-        # Estava ocorrendo um erro de formato ao comparar os valores, convertendo para decimal corrige o erro
-        self.assertEqual(Cotacao.objects.get(moeda="BRL").valor, Decimal("5.20"))
-        self.assertEqual(Cotacao.objects.get(moeda="EUR").valor, Decimal("0.92"))
-        self.assertEqual(Cotacao.objects.get(moeda="JPY").valor, Decimal("130.50"))
+        # Conta quantos dias únicos ainda existem no banco
+        dias_no_banco = Cotacao.objects.values_list("data", flat=True).distinct()
+        
+        # Verifica se apenas 5 dias úteis foram mantidos
+        self.assertEqual(len(dias_no_banco), 5, "O banco deve manter apenas os últimos 5 dias úteis")
