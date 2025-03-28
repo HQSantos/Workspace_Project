@@ -7,7 +7,21 @@
     <title>Gráfico de Cotações</title>
 </head>
 <body>
-    <h2>Cotações dos Últimos 5 Dias Úteis</h2>
-    <img src="{{ grafico_url }}" alt="Gráfico de Cotações">
+    <form method="GET" action="{% url 'exibir_grafico' %}">
+        <label for="data">Selecione uma data:</label>
+        <input type="date" id="data" name="data" value="{{ data_selecionada }}">
+    
+        <br><br>
+    
+        <label>Escolha as moedas:</label>
+        {% for moeda in ["BRL", "EUR", "JPY"] %}
+            <input type="checkbox" name="moedas" value="{{ moeda }}" 
+                {% if moeda in moedas_selecionadas %}checked{% endif %}> {{ moeda }}
+        {% endfor %}
+    
+        <button type="submit">Buscar</button>
+    </form>
+    <img src="{{ grafico_url }}" alt="Gráfico de cotações">
+     
 </body>
 </html>
