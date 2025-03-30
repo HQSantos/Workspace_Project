@@ -1,27 +1,64 @@
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gráfico de Cotações</title>
+    <style>
+        /* Estilizando o overlay de carregamento */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            line-height: 100vh;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body>
-    <form method="GET" action="{% url 'exibir_grafico' %}">
-        <label for="data">Selecione uma data:</label>
-        <input type="date" id="data" name="data" value="{{ data_selecionada }}">
+
+    <div id="overlay">🔄 Gerando gráfico, aguarde...</div>
+
+    <form id="formulario-grafico" method="GET" action="{% url 'exibir_grafico' %}">
+        <label for="data">Selecione a Data:</label>
+        <input type="date" name="data" id="data" value="{{ data_selecionada }}">
     
-        <br><br>
+        <br>
     
-        <label>Escolha as moedas:</label>
-        {% for moeda in ["BRL", "EUR", "JPY"] %}
-            <input type="checkbox" name="moedas" value="{{ moeda }}" 
-                {% if moeda in moedas_selecionadas %}checked{% endif %}> {{ moeda }}
-        {% endfor %}
+        <label>Selecione as Moedas:</label>
+        <input type="checkbox" name="moedas" value="BRL" {% if "BRL" in moedas_selecionadas %}checked{% endif %}> BRL
+        <input type="checkbox" name="moedas" value="EUR" {% if "EUR" in moedas_selecionadas %}checked{% endif %}> EUR
+        <input type="checkbox" name="moedas" value="JPY" {% if "JPY" in moedas_selecionadas %}checked{% endif %}> JPY
     
-        <button type="submit">Buscar</button>
+        <br>
+    
+        <button id="btn-gerar" type="submit">Gerar Gráfico</button>
     </form>
-    <img src="{{ grafico_url }}" alt="Gráfico de cotações">
-     
+    
+    {% if grafico_url %}
+        <img src="{{ grafico_url }}" alt="Gráfico de Cotações">
+    {% endif %}
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("formulario-grafico");
+        const overlay = document.getElementById("overlay");
+
+        form.addEventListener("submit", function(event) {
+            overlay.style.display = "block"; // Exibe o overlay, bloqueando a tela
+        });
+
+        window.addEventListener("load", function() {
+            overlay.style.display = "none"; // Esconde o overlay quando a página carrega
+        });
+    });
+    </script>
 </body>
 </html>

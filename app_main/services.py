@@ -51,3 +51,33 @@ def obter_cotacoes():
         log_error("Erro ao buscar cotações", e)
     except Exception as e:
         log_error("Erro inesperado", e)
+def obter_cotacoes_para_semana(data_referencia):
+    """
+    Consulta a API VATComply para obter as cotações de BRL, EUR e JPY
+    para os últimos 5 dias úteis a partir da data selecionada.
+    """
+    if not isinstance(data_referencia, datetime):
+        data_referencia = datetime.strptime(data_referencia, "%Y-%m-%d")
+    
+    dias_uteis = []
+    data_temp = data_referencia
+    while len(dias_uteis) < 5:
+        if data_temp.weekday() < 5:  # Segunda (0) a Sexta (4)
+            dias_uteis.append(data_temp.strftime("%Y-%m-%d"))
+        data_temp -= timedelta(days=1)
+    
+    cotacoes = {}
+    for data in dias_uteis:
+        url = f"https://api.vatcomply.com/rates?date={data}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            dados = response.json()
+            cotacoes[data] = {
+                "BRL": dados["rates"].get("BRL"),
+                "EUR": dados["rates"].get("EUR"),
+                "JPY": dados["rates"].get("JPY"),
+            }
+        else:
+            cotacoes[data] = {"BRL": None, "EUR": None, "JPY": None}
+    
+    return cotacoes

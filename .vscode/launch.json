@@ -7,7 +7,7 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "test",
-                "app_main.tests.test_services.CotacaoServiceTest.test_obter_cotacoes_sucesso",
+                "app_main.tests.CotacaoTestCase.test_view_grafico",
                 "--keepdb"
             ],
             "django": true,
